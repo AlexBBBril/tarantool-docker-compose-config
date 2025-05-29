@@ -111,7 +111,7 @@ connect_console() {
     print_colored $BLUE "Подключение к консоли Tarantool..."
     print_colored $YELLOW "Для выхода используйте: \\q или Ctrl+D"
     echo ""
-    docker exec -it tarantool_db tarantool -c "require('console').connect('localhost:3301')"
+    docker exec -it tarantool_db console
 }
 
 create_backup() {
