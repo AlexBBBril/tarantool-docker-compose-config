@@ -46,3 +46,7 @@
     files     - Показать содержимое директорий
 
    ```
+
+---
+docker exec -u 0 -it tarantool_db tt rocks install https://github.com/moonlibs/package-reload/raw/master/rockspecs/package-reload-scm-1.rockspec
+docker exec -u 0 -it tarantool_db tt rocks install vshard
