@@ -2,3 +2,4 @@
 .env
 /tarantool_data
 .idea
+/tarantool_config/.rocks/
