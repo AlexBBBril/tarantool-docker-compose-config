@@ -1,0 +1,65 @@
+local bucket = 1;
+return vshard.router.callrw(bucket,
+        'box.space.citizens:insert',
+        { {
+              1, bucket, 'Renata Litvinova',
+              { theatre = "Moscow Art Theatre" }
+          } }
+)
+
+------------------------------
+
+local bucket = 4;
+return vshard.router.callrw(bucket,
+        'box.space.citizens:insert',
+        { { 2, bucket, 'Sergey Bezrukov',
+            { theatre = "Moscow Provincial Theater" } } })
+
+------------------------------
+
+local bucket = 8; return vshard.router.callrw(bucket,
+        'box.space.citizens:insert',
+        {{3, bucket, 'Ivan Urgant', {work="Ostankino"}}})
+
+
+------------------------------
+
+local bucket = 12; return vshard.router.callrw(bucket,
+        'box.space.citizens:insert',
+        {{4, bucket, 'Zemfira', {work="Self-employed"}}})
+
+
+------------------------------
+
+log = require 'log'
+actors = {
+    {name = "Sean Connery", film = "Dr. No", year = "1962"},
+    {name = "George Lazenby", film = "On Her Majesty's Secret Service", year = "1969"},
+    {name = "Roger Moore", film = "Live and Let Die", year = "1973"},
+    {name = "Timothy Dalton", film = "The Living Daylights", year = "1987"},
+    {name = "Pierce Brosnan", film = "GoldenEye", year = "1995"},
+    {name = "Daniel Craig", film = "Casino Royale", year = "2006"},
+    {name = "Ana de Armas", film = "No Time to Die", year = "2020"},
+    {name = "Matt Damon", film = "Jason Bourne", year = "2016"},
+    {name = "Tom Cruise", film = "Mission: Impossible", year = "1996"},
+    {name = "Keanu Reeves", film = "Matrix", year = "1999"},
+    {name = "Uma Thurman", film = "Kill Bill", year = "2003"},
+    {name = "Jackie Chan", film = "Armour of God", year = "1986"},
+    {name = "Brad Pitt", film = "Mr. & Mrs. Smith", year = "2005"},
+    {name = "Arnold Schwarzenegger", film = "The Terminator", year = "1984"},
+    {name = "Jonny Lee Miller", film = "Hackers", year = "1995"},
+    {name = "Steven Frederic Seagal", film = "Above the Law", year = "1988"},
+}
+
+for i, actor in pairs(actors) do
+    local bucket = i % 16 + 1
+    local _, err = vshard.router.callrw(
+            bucket,
+            'box.space.citizens:insert',
+            {{
+                 i+10, bucket, actor.name,
+                 {film=actor.film, year = actor.year}
+             }}
+    )
+    if err then log.info(err) end
+end

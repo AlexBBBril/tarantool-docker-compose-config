@@ -33,8 +33,12 @@ show_help() {
 
 setup_directories() {
     print_colored $BLUE "Создание директорий..."
-    mkdir -p tarantool_data/var/lib/tarantool
-    mkdir -p tarantool_data/var/log/tarantool
+    mkdir -p tarantool_data/main/var/lib/tarantool
+    mkdir -p tarantool_data/main/var/log/tarantool
+    mkdir -p tarantool_data/moscow/var/lib/tarantool
+    mkdir -p tarantool_data/moscow/var/log/tarantool
+    mkdir -p tarantool_data/spb/var/lib/tarantool
+    mkdir -p tarantool_data/spb/var/log/tarantool
     mkdir -p tarantool_config
     mkdir -p backups
 
@@ -121,8 +125,12 @@ create_backup() {
     mkdir -p "$backup_dir"
 
     # Копируем снэпшоты и WAL файлы
-    cp -r tarantool_data/var/lib/tarantool/*.snap "$backup_dir/" 2>/dev/null || true
-    cp -r tarantool_data/var/lib/tarantool/*.xlog "$backup_dir/" 2>/dev/null || true
+    cp -r tarantool_data/main/var/lib/tarantool/*.snap "$backup_dir/" 2>/dev/null || true
+    cp -r tarantool_data/main/var/lib/tarantool/*.xlog "$backup_dir/" 2>/dev/null || true
+    cp -r tarantool_data/moscow/var/lib/tarantool/*.snap "$backup_dir/" 2>/dev/null || true
+    cp -r tarantool_data/moscow/var/lib/tarantool/*.xlog "$backup_dir/" 2>/dev/null || true
+    cp -r tarantool_data/spb/var/lib/tarantool/*.snap "$backup_dir/" 2>/dev/null || true
+    cp -r tarantool_data/spb/var/lib/tarantool/*.xlog "$backup_dir/" 2>/dev/null || true
 
     # Создаем архив
     tar -czf "backups/tarantool_backup_$timestamp.tar.gz" -C "$backup_dir" .
@@ -140,8 +148,8 @@ clean_data() {
         docker compose down -v
 
         print_colored $BLUE "Удаление данных..."
-        rm -rf tarantool_data/var/lib/tarantool/*
-        rm -rf tarantool_data/var/log/tarantool/*
+        sudo rm -rf tarantool_data/*
+        ls -la .
 
         print_colored $GREEN "Данные удалены!"
     else
@@ -151,10 +159,12 @@ clean_data() {
 
 view_files() {
     print_colored $BLUE "Содержимое директории данных:"
-    ls -la tarantool_data/var/lib/tarantool/
+    ls -la tarantool_data/main/var/lib/tarantool/
+    ls -la tarantool_data/moscow/var/lib/tarantool/
     echo ""
     print_colored $BLUE "Содержимое директории логов:"
-    ls -la tarantool_data/var/log/tarantool/
+    ls -la tarantool_data/main/var/log/tarantool/
+    ls -la tarantool_data/moscow/var/log/tarantool/
 }
 
 fix_permissions() {
@@ -185,8 +195,16 @@ fix_permissions() {
     fi
 
     print_colored $BLUE "Проверка прав доступа:"
-    ls -la tarantool_data/var/lib/tarantool/
-    ls -la tarantool_data/var/log/tarantool/
+    ls -la tarantool_data/main/var/lib/tarantool/
+    ls -la tarantool_data/main/var/log/tarantool/
+    ls -la tarantool_data/moscow/var/lib/tarantool/
+    ls -la tarantool_data/moscow/var/log/tarantool/
+    ls -la tarantool_data/moscow-replica/var/lib/tarantool/
+    ls -la tarantool_data/moscow-replica/var/log/tarantool/
+    ls -la tarantool_data/spb/var/lib/tarantool/
+    ls -la tarantool_data/spb/var/log/tarantool/
+    ls -la tarantool_data/spb-replica/var/lib/tarantool/
+    ls -la tarantool_data/spb-replica/var/log/tarantool/
 }
 
 # Основная логика

@@ -1,33 +1,35 @@
 services:
-  tarantool:
-    build: .
-    container_name: tarantool_db
-    ports:
-      - "3301:3301"  # Tarantool порт
-    volumes:
-      # Данные и снэпшоты
-      - ./tarantool_data/main/var/lib/tarantool:/var/lib/tarantool
-      # Логи
-      - ./tarantool_data/main/var/log/tarantool:/var/log/tarantool
-      # Конфигурация (опционально)
-      - ./tarantool_config:/opt/tarantool
-    environment:
-      TARANTOOL_USER_NAME: admin
-      TARANTOOL_USER_PASSWORD: password
-    user: "${TARANTOOL_UID:-999}:${TARANTOOL_GID:-999}"
-    # Условный запуск в зависимости от типа конфигурации
-    command: tarantool /opt/tarantool/init.lua
-    restart: unless-stopped
-    healthcheck:
-      test: [ "CMD-SHELL", "tarantool -e 'require(\"net.box\").connect(\"localhost:3301\"):ping()' || exit 1" ]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-    networks:
-      - tarantool_network
+#  tarantool:
+#    build: .
+#    container_name: tarantool_db
+#    ports:
+#      - "3301:3301"  # Tarantool порт
+#    volumes:
+#      # Данные и снэпшоты
+#      - ./tarantool_data/main/var/lib/tarantool:/var/lib/tarantool
+#      # Логи
+#      - ./tarantool_data/main/var/log/tarantool:/var/log/tarantool
+#      # Конфигурация (опционально)
+#      - ./tarantool_config:/opt/tarantool
+#    environment:
+#      TARANTOOL_USER_NAME: admin
+#      TARANTOOL_USER_PASSWORD: password
+#    user: "${TARANTOOL_UID:-999}:${TARANTOOL_GID:-999}"
+#    # Условный запуск в зависимости от типа конфигурации
+#    command: tarantool /opt/tarantool/init.lua
+#    restart: unless-stopped
+#    healthcheck:
+#      test: [ "CMD-SHELL", "tarantool -e 'require(\"net.box\").connect(\"localhost:3301\"):ping()' || exit 1" ]
+#      interval: 30s
+#      timeout: 10s
+#      retries: 3
+#    networks:
+#      - tarantool_network
 
   tarantool_moscow:
-    build: .
+    build:
+      context: .
+      dockerfile: Moscow.Dockerfile
     container_name: tarantool_moscow
     ports:
       - "30011:30011"  # Tarantool порт
@@ -43,10 +45,97 @@ services:
       TARANTOOL_USER_PASSWORD: password
     user: "${TARANTOOL_UID:-999}:${TARANTOOL_GID:-999}"
     # Условный запуск в зависимости от типа конфигурации
-    command: tarantool /opt/tarantool/moscow.lua
+    command: ["sh", "/opt/tarantool/entrypoint.sh"]
     restart: unless-stopped
     healthcheck:
       test: [ "CMD-SHELL", "tarantool -e 'require(\"net.box\").connect(\"localhost:30011\"):ping()' || exit 1" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - tarantool_network
+
+  tarantool_moscow_replica:
+    build:
+      context: .
+      dockerfile: Moscow_replica.Dockerfile
+    container_name: tarantool_moscow_replica
+    ports:
+      - "30012:30012"  # Tarantool порт
+    volumes:
+      # Данные и снэпшоты
+      - ./tarantool_data/moscow_replica/var/lib/tarantool:/var/lib/tarantool
+      # Логи
+      - ./tarantool_data/moscow_replica/var/log/tarantool:/var/log/tarantool
+      # Конфигурация (опционально)
+      - ./tarantool_config:/opt/tarantool
+    environment:
+      TARANTOOL_USER_NAME: admin
+      TARANTOOL_USER_PASSWORD: password
+    user: "${TARANTOOL_UID:-999}:${TARANTOOL_GID:-999}"
+    # Условный запуск в зависимости от типа конфигурации
+    command: [ "sh", "/opt/tarantool/moscow-replica-entrypoint.sh" ]
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD-SHELL", "tarantool -e 'require(\"net.box\").connect(\"localhost:30012\"):ping()' || exit 1" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - tarantool_network
+
+  tarantool_spb:
+    build:
+      context: .
+      dockerfile: Spb.Dockerfile
+    container_name: tarantool_spb
+    ports:
+      - "30021:30021"  # Tarantool порт
+    volumes:
+      # Данные и снэпшоты
+      - ./tarantool_data/spb/var/lib/tarantool:/var/lib/tarantool
+      # Логи
+      - ./tarantool_data/spb/var/log/tarantool:/var/log/tarantool
+      # Конфигурация (опционально)
+      - ./tarantool_config:/opt/tarantool
+    environment:
+      TARANTOOL_USER_NAME: admin
+      TARANTOOL_USER_PASSWORD: password
+    user: "${TARANTOOL_UID:-999}:${TARANTOOL_GID:-999}"
+    # Условный запуск в зависимости от типа конфигурации
+    command: ["sh", "/opt/tarantool/spb-entrypoint.sh"]
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD-SHELL", "tarantool -e 'require(\"net.box\").connect(\"localhost:30021\"):ping()' || exit 1" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - tarantool_network
+
+  tarantool_spb_replica:
+    build:
+      context: .
+      dockerfile: Spb_replica.Dockerfile
+    container_name: tarantool_spb_replica
+    ports:
+      - "30022:30022"  # Tarantool порт
+    volumes:
+      # Данные и снэпшоты
+      - ./tarantool_data/spb_replica/var/lib/tarantool:/var/lib/tarantool
+      # Логи
+      - ./tarantool_data/spb_replica/var/log/tarantool:/var/log/tarantool
+      # Конфигурация (опционально)
+      - ./tarantool_config:/opt/tarantool
+    environment:
+      TARANTOOL_USER_NAME: admin
+      TARANTOOL_USER_PASSWORD: password
+    user: "${TARANTOOL_UID:-999}:${TARANTOOL_GID:-999}"
+    # Условный запуск в зависимости от типа конфигурации
+    command: [ "sh", "/opt/tarantool/spb-replica-entrypoint.sh" ]
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD-SHELL", "tarantool -e 'require(\"net.box\").connect(\"localhost:30022\"):ping()' || exit 1" ]
       interval: 30s
       timeout: 10s
       retries: 3

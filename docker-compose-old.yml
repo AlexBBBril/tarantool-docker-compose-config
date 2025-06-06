@@ -1,0 +1,31 @@
+services:
+  tarantool:
+    image: tarantool/tarantool:latest
+    container_name: tarantool_db
+    ports:
+      - "3301:3301"  # Tarantool порт
+    volumes:
+      # Данные и снэпшоты
+      - ./tarantool_data/var/lib/tarantool:/var/lib/tarantool
+      # Логи
+      - ./tarantool_data/var/log/tarantool:/var/log/tarantool
+      # Конфигурация (опционально)
+      - ./tarantool_config:/opt/tarantool
+    environment:
+      TARANTOOL_USER_NAME: admin
+      TARANTOOL_USER_PASSWORD: password
+    user: "${TARANTOOL_UID:-999}:${TARANTOOL_GID:-999}"
+    # Условный запуск в зависимости от типа конфигурации
+    command: tarantool /opt/tarantool/init.lua
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD-SHELL", "tarantool -e 'require(\"net.box\").connect(\"localhost:3301\"):ping()' || exit 1" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - tarantool_network
+
+networks:
+  tarantool_network:
+    driver: bridge
